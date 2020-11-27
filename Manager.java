@@ -1,17 +1,11 @@
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Scanner;
+import java.sql.SQLException;
 
-public class Manager {
-	private Connection conn;
-	private Scanner scanner;
-	private int id;
-
+public class Manager extends User {
 	public Manager(Connection conn) {
-		this.conn = conn;
-		this.scanner = HotelRNTN.SCANNER;
+		super(conn);
 	}
 
 	public void start() {
@@ -54,8 +48,9 @@ public class Manager {
 			ResultSet rs = pstmt.getResultSet();
 			if (rs.next()) {
 				id = rs.getInt("id");
-				System.out.printf("You have successfully signed in as %s %s!%n", rs.getString("first_name"),
-						rs.getString("last_name"));
+				firstName = rs.getString("first_name");
+				lastName = rs.getString("last_name");
+				startSignedIn();
 			} else {
 				System.out.println("Invalid credentials, please try again!");
 			}
@@ -65,5 +60,68 @@ public class Manager {
 				System.out.println("An error has occurred while signing in!");
 			}
 		}
+	}
+
+	private void startSignedIn() {
+		String choice = "";
+
+		while (!choice.equals("7")) {
+			System.out.printf("Signed in as manager %s %s%n", firstName, lastName);
+			System.out.printf("Please choose an option:%5s%s%5s%s%5s%s%5s%s%5s%s%5s%s%5s%s%n", "",
+					"[1] Number of Reservations by Date", "", "[2] Number of Reservations by Room", "",
+					"[3] Popular Months", "", "[4] Recurring Guests", "", "[5] High-Activity Months", "",
+					"[6] Unpopular Rooms", "", "[7] Sign Out");
+			choice = scanner.nextLine();
+
+			switch (choice) {
+			case "1":
+				numberReservationsDate();
+				break;
+			case "2":
+				numberReservationsRoom();
+				break;
+			case "3":
+				popularMonths();
+				break;
+			case "4":
+				recurringGuests();
+				break;
+			case "5":
+				highActivityMonths();
+				break;
+			case "6":
+				unpopularRooms();
+				break;
+			case "7":
+				System.out.println("Signed out!");
+				break;
+			default:
+				System.out.println("Invalid choice, please try again!");
+			}
+		}
+	}
+
+	private void numberReservationsDate() {
+
+	}
+
+	private void numberReservationsRoom() {
+
+	}
+
+	private void popularMonths() {
+
+	}
+
+	private void recurringGuests() {
+
+	}
+
+	private void highActivityMonths() {
+
+	}
+
+	private void unpopularRooms() {
+
 	}
 }

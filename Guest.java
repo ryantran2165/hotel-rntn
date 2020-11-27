@@ -1,17 +1,11 @@
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Scanner;
+import java.sql.SQLException;
 
-public class Guest {
-	private Connection conn;
-	private Scanner scanner;
-	private int id;
-
+public class Guest extends User {
 	public Guest(Connection conn) {
-		this.conn = conn;
-		this.scanner = HotelRNTN.SCANNER;
+		super(conn);
 	}
 
 	public void start() {
@@ -95,8 +89,9 @@ public class Guest {
 			ResultSet rs = pstmt.getResultSet();
 			if (rs.next()) {
 				id = rs.getInt("id");
-				System.out.printf("You have successfully signed in as %s %s!%n", rs.getString("first_name"),
-						rs.getString("last_name"));
+				firstName = rs.getString("first_name");
+				lastName = rs.getString("last_name");
+				startSignedIn();
 			} else {
 				System.out.println("Invalid credentials, please try again!");
 			}
@@ -106,5 +101,68 @@ public class Guest {
 				System.out.println("An error has occurred while signing in!");
 			}
 		}
+	}
+
+	private void startSignedIn() {
+		String choice = "";
+
+		while (!choice.equals("7")) {
+			System.out.printf("Signed in as guest %s %s%n", firstName, lastName);
+			System.out.printf("Please choose an option:%5s%s%5s%s%5s%s%5s%s%5s%s%5s%s%5s%s%n", "",
+					"[1] Create Reservation", "", "[2] Cancel Reservation", "", "[3] Update Reservation", "",
+					"[4] View Rooms (Price)", "", "[5] View Rooms (Sqft)", "", "[6] View Rooms (Floor)", "",
+					"[7] Sign Out");
+			choice = scanner.nextLine();
+
+			switch (choice) {
+			case "1":
+				createReservation();
+				break;
+			case "2":
+				cancelReservation();
+				break;
+			case "3":
+				updateReservation();
+				break;
+			case "4":
+				viewRoomsPrice();
+				break;
+			case "5":
+				viewRoomsSqft();
+				break;
+			case "6":
+				viewRoomsFloor();
+				break;
+			case "7":
+				System.out.println("Signed out!");
+				break;
+			default:
+				System.out.println("Invalid choice, please try again!");
+			}
+		}
+	}
+
+	private void createReservation() {
+
+	}
+
+	private void cancelReservation() {
+
+	}
+
+	private void updateReservation() {
+
+	}
+
+	private void viewRoomsPrice() {
+
+	}
+
+	private void viewRoomsSqft() {
+
+	}
+
+	private void viewRoomsFloor() {
+
 	}
 }
