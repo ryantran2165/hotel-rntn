@@ -1,7 +1,10 @@
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public class Guest extends User {
 	public Guest(Connection conn) {
@@ -143,7 +146,45 @@ public class Guest extends User {
 	}
 
 	private void createReservation() {
+		System.out.println("Hotel RNTN Create Reservation");
 
+		System.out.print("Please enter room id: ");
+		String roomId = scanner.nextLine();
+		int roomIdInt;
+		try {
+			roomIdInt = Integer.parseInt(roomId);
+		} catch (NumberFormatException e) {
+			System.out.println("Invalid room id, please try again!");
+			return;
+		}
+
+		System.out.print("Please enter reservation date (dd-mm-yyyy): ");
+		String date = scanner.nextLine();
+		SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
+		long milliseconds;
+		try {
+			milliseconds = f.parse(date).getTime();
+		} catch (ParseException e) {
+			System.out.println("Invalid date, please try again!");
+			return;
+		}
+		Date reserveDate = new Date(milliseconds);
+
+		String sql = "INSERT INTO reservation (account_id, room_id, reserve_date) VALUES (?, ?, ?)";
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, id);
+			pstmt.setInt(2, roomIdInt);
+			pstmt.setDate(3, reserveDate);
+			pstmt.executeUpdate();
+
+			System.out.println("You have successfully created the reservation!");
+		} catch (SQLException e) {
+			switch (e.getErrorCode()) {
+			default:
+				System.out.println("An error has occurred while creating the reservation!");
+			}
+		}
 	}
 
 	private void cancelReservation() {
