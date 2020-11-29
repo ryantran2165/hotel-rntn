@@ -1,5 +1,5 @@
-import java.sql.DriverManager;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
 
@@ -8,6 +8,8 @@ public class HotelRNTN {
 	private static final String DATABASE_USERNAME = "root";
 	private static final String DATABASE_PASSWORD = "toor";
 	public static final Scanner SCANNER = new Scanner(System.in);
+	public static final int NEW_LINE_INTERVAL = 5;
+	public static final int SPACE_SIZE = 5;
 
 	public static void main(String[] args) {
 		try {
@@ -21,12 +23,12 @@ public class HotelRNTN {
 	}
 
 	public static void start(Connection conn) {
+		String[] options = { "[1] Guest", "[2] Manager", "[3] Quit" };
 		String choice = "";
 
 		while (!choice.equals("3")) {
 			System.out.println("Hotel RNTN Main Menu");
-			System.out.printf("Please choose an option:%5s%s%5s%s%5s%s%n", "", "[1] Guest", "", "[2] Manager", "",
-					"[3] Quit");
+			printOptions(options);
 			choice = SCANNER.nextLine();
 
 			switch (choice) {
@@ -46,5 +48,30 @@ public class HotelRNTN {
 				System.out.println("Invalid choice, please try again!");
 			}
 		}
+	}
+
+	public static void printOptions(String[] options) {
+		StringBuilder format = new StringBuilder();
+		Object[] values = new Object[2 * options.length - (int) Math.ceil(options.length / NEW_LINE_INTERVAL)];
+		int valueIndex = 0;
+
+		for (int i = 0; i < options.length; i++) {
+			if (i != 0 && i % NEW_LINE_INTERVAL == 0) {
+				format.append("%n");
+			}
+
+			if (i % NEW_LINE_INTERVAL != 0) {
+				format.append("%" + SPACE_SIZE + "s");
+				values[valueIndex] = "";
+				valueIndex++;
+			}
+
+			format.append("%s");
+			values[valueIndex] = options[i];
+			valueIndex++;
+		}
+		format.append("%n");
+
+		System.out.printf(format.toString(), values);
 	}
 }

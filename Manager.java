@@ -10,11 +10,12 @@ public class Manager extends User {
 	}
 
 	public void start() {
+		String[] options = { "[1] Sign In", "[2] Back" };
 		String choice = "";
 
 		while (!choice.equals("2")) {
 			System.out.println("Hotel RNTN Manager Portal");
-			System.out.printf("Please choose an option:%5s%s%5s%s%n", "", "[1] Sign In", "", "[2] Back");
+			HotelRNTN.printOptions(options);
 			choice = scanner.nextLine();
 
 			switch (choice) {
@@ -39,7 +40,7 @@ public class Manager extends User {
 		System.out.print("Please enter password: ");
 		String password = scanner.nextLine();
 
-		String sql = "SELECT id, first_name, last_name FROM ACCOUNT where email = ? AND password = ? AND is_admin = TRUE";
+		String sql = "SELECT id, first_name, last_name FROM account where email = ? AND password = ? AND is_admin = TRUE";
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, email);
@@ -47,6 +48,7 @@ public class Manager extends User {
 			pstmt.executeQuery();
 
 			ResultSet rs = pstmt.getResultSet();
+
 			if (rs.next()) {
 				id = rs.getInt("id");
 				firstName = rs.getString("first_name");
@@ -64,46 +66,74 @@ public class Manager extends User {
 	}
 
 	private void startSignedIn() {
+		String[] options = { "[1] View All Rooms", "[2] View Reserved Rooms", "[3] Create Room", "[4] Delete Room",
+				"[5] Number of Reservations by Date", "[6] Number of Reservations by Room", "[7] Popular Months",
+				"[8] Recurring Guests", "[9] High-Activity Months", "[10] Unpopular Rooms", "[11] Sign Out" };
 		String choice = "";
 
-		while (!choice.equals("9")) {
+		while (!choice.equals("11")) {
 			System.out.printf("Signed in as manager %s %s%n", firstName, lastName);
-			System.out.printf("Please choose an option:%5s%s%5s%s%5s%s%5s%s%5s%s%5s%s%5s%s%5s%s%5s%s%n", "",
-					"[1] Create Room", "", "[2] Delete Room", "", "[3] Number of Reservations by Date", "",
-					"[4] Number of Reservations by Room", "", "[5] Popular Months", "", "[6] Recurring Guests", "",
-					"[7] High-Activity Months", "", "[8] Unpopular Rooms", "", "[9] Sign Out");
+			HotelRNTN.printOptions(options);
 			choice = scanner.nextLine();
 
 			switch (choice) {
 			case "1":
-				createRoom();
+				viewRoomsAll();
 				break;
 			case "2":
-				deleteRoom();
+				viewReservedRooms();
 				break;
 			case "3":
-				numberReservationsDate();
+				createRoom();
 				break;
 			case "4":
-				numberReservationsRoom();
+				deleteRoom();
 				break;
 			case "5":
-				popularMonths();
+				numberReservationsDate();
 				break;
 			case "6":
-				recurringGuests();
+				numberReservationsRoom();
 				break;
 			case "7":
-				highActivityMonths();
+				popularMonths();
 				break;
 			case "8":
-				unpopularRooms();
+				recurringGuests();
 				break;
 			case "9":
+				highActivityMonths();
+				break;
+			case "10":
+				unpopularRooms();
+				break;
+			case "11":
 				System.out.println("Signed out!");
 				break;
 			default:
 				System.out.println("Invalid choice, please try again!");
+			}
+		}
+	}
+
+	private void viewReservedRooms() {
+		String sql = "SELECT id, room_num, room_floor, sqft, price FROM room WHERE id IN (SELECT room_id FROM reservation)";
+
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.executeQuery();
+
+			ResultSet rs = pstmt.getResultSet();
+
+			if (!rs.isBeforeFirst()) {
+				System.out.println("There are no reserved rooms!");
+			} else {
+				printRooms(rs);
+			}
+		} catch (SQLException e) {
+			switch (e.getErrorCode()) {
+			default:
+				System.out.println("An error has occurred while viewing reserved rooms!");
 			}
 		}
 	}
@@ -117,6 +147,7 @@ public class Manager extends User {
 		System.out.print("Please enter room floor: ");
 		String roomFloor = scanner.nextLine();
 		int roomFloorInt;
+
 		try {
 			roomFloorInt = Integer.parseInt(roomFloor);
 		} catch (NumberFormatException e) {
@@ -127,6 +158,7 @@ public class Manager extends User {
 		System.out.print("Please enter room sqft: ");
 		String sqft = scanner.nextLine();
 		int sqftInt;
+
 		try {
 			sqftInt = Integer.parseInt(sqft);
 		} catch (NumberFormatException e) {
@@ -137,6 +169,7 @@ public class Manager extends User {
 		System.out.print("Please enter room price: ");
 		String price = scanner.nextLine();
 		BigDecimal priceDec;
+
 		try {
 			priceDec = new BigDecimal(price);
 		} catch (NumberFormatException e) {
@@ -145,6 +178,7 @@ public class Manager extends User {
 		}
 
 		String sql = "INSERT INTO room (room_num, room_floor, sqft, price) VALUES (?, ?, ?, ?)";
+
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, roomNumber);
@@ -164,7 +198,34 @@ public class Manager extends User {
 	}
 
 	private void deleteRoom() {
+		System.out.println("Hotel RNTN Manager Delete Room");
 
+		System.out.print("Please enter room id: ");
+		String id = scanner.nextLine();
+		int idInt;
+
+		try {
+			idInt = Integer.parseInt(id);
+		} catch (NumberFormatException e) {
+			System.out.println("Invalid id, please try again!");
+			return;
+		}
+
+		String sql = "DELETE FROM room WHERE id = ?";
+
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, idInt);
+			pstmt.executeUpdate();
+
+			System.out.println("You have successfully deleted the room!");
+		} catch (SQLException e) {
+			switch (e.getErrorCode()) {
+			default:
+				e.printStackTrace();
+				System.out.println("An error has occurred while deleting the room!");
+			}
+		}
 	}
 
 	private void numberReservationsDate() {

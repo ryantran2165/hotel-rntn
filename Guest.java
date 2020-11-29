@@ -12,12 +12,12 @@ public class Guest extends User {
 	}
 
 	public void start() {
+		String[] options = { "[1] Sign Up", "[2] Sign In", "[3] Back" };
 		String choice = "";
 
 		while (!choice.equals("3")) {
 			System.out.println("Hotel RNTN Guest Portal");
-			System.out.printf("Please choose an option:%5s%s%5s%s%5s%s%n", "", "[1] Sign Up", "", "[2] Sign In", "",
-					"[3] Back");
+			HotelRNTN.printOptions(options);
 			choice = scanner.nextLine();
 
 			switch (choice) {
@@ -82,7 +82,8 @@ public class Guest extends User {
 		System.out.print("Please enter password: ");
 		String password = scanner.nextLine();
 
-		String sql = "SELECT id, first_name, last_name FROM ACCOUNT where email = ? AND password = ? AND is_admin = FALSE";
+		String sql = "SELECT id, first_name, last_name FROM account where email = ? AND password = ? AND is_admin = FALSE";
+
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, email);
@@ -90,10 +91,12 @@ public class Guest extends User {
 			pstmt.executeQuery();
 
 			ResultSet rs = pstmt.getResultSet();
+
 			if (rs.next()) {
 				id = rs.getInt("id");
 				firstName = rs.getString("first_name");
 				lastName = rs.getString("last_name");
+
 				startSignedIn();
 			} else {
 				System.out.println("Invalid credentials, please try again!");
@@ -107,14 +110,13 @@ public class Guest extends User {
 	}
 
 	private void startSignedIn() {
+		String[] options = { "[1] Create Reservation", "[2] Cancel Reservation", "[3] Update Reservation",
+				"[4] View Rooms (Price)", "[5] View Rooms (Sqft)", "[6] View Rooms (Floor)", "[7] Sign Out" };
 		String choice = "";
 
 		while (!choice.equals("7")) {
 			System.out.printf("Signed in as guest %s %s%n", firstName, lastName);
-			System.out.printf("Please choose an option:%5s%s%5s%s%5s%s%5s%s%5s%s%5s%s%5s%s%n", "",
-					"[1] Create Reservation", "", "[2] Cancel Reservation", "", "[3] Update Reservation", "",
-					"[4] View Rooms (Price)", "", "[5] View Rooms (Sqft)", "", "[6] View Rooms (Floor)", "",
-					"[7] Sign Out");
+			HotelRNTN.printOptions(options);
 			choice = scanner.nextLine();
 
 			switch (choice) {
@@ -151,6 +153,7 @@ public class Guest extends User {
 		System.out.print("Please enter room id: ");
 		String roomId = scanner.nextLine();
 		int roomIdInt;
+
 		try {
 			roomIdInt = Integer.parseInt(roomId);
 		} catch (NumberFormatException e) {
@@ -161,16 +164,18 @@ public class Guest extends User {
 		System.out.print("Please enter reservation date (dd-mm-yyyy): ");
 		String date = scanner.nextLine();
 		SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
-		long milliseconds;
+		Date reserveDate;
+
 		try {
-			milliseconds = f.parse(date).getTime();
+			long ms = f.parse(date).getTime();
+			reserveDate = new Date(ms);
 		} catch (ParseException e) {
 			System.out.println("Invalid date, please try again!");
 			return;
 		}
-		Date reserveDate = new Date(milliseconds);
 
 		String sql = "INSERT INTO reservation (account_id, room_id, reserve_date) VALUES (?, ?, ?)";
+
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, id);

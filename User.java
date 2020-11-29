@@ -1,4 +1,8 @@
+import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public abstract class User {
@@ -11,5 +15,41 @@ public abstract class User {
 	public User(Connection conn) {
 		this.conn = conn;
 		scanner = HotelRNTN.SCANNER;
+	}
+
+	protected void viewRoomsAll() {
+		String sql = "SELECT id, room_num, room_floor, sqft, price FROM room";
+
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.executeQuery();
+
+			ResultSet rs = pstmt.getResultSet();
+
+			if (!rs.isBeforeFirst()) {
+				System.out.println("There are no rooms!");
+			} else {
+				printRooms(rs);
+			}
+		} catch (SQLException e) {
+			switch (e.getErrorCode()) {
+			default:
+				System.out.println("An error has occurred while viewing all rooms!");
+			}
+		}
+	}
+
+	protected void printRooms(ResultSet rs) throws SQLException {
+		System.out.printf("%-20s%-20s%-20s%-20s%-20s%n", "id", "room number", "room floor", "sqft", "price");
+
+		while (rs.next()) {
+			int id = rs.getInt("id");
+			String roomNum = rs.getString("room_num");
+			int roomFloor = rs.getInt("room_floor");
+			int sqft = rs.getInt("sqft");
+			BigDecimal price = rs.getBigDecimal("price");
+
+			System.out.printf("%-20d%-20s%-20d%-20d%-20.2f%n", id, roomNum, roomFloor, sqft, price);
+		}
 	}
 }
