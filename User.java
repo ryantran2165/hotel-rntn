@@ -1,8 +1,10 @@
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
 public abstract class User {
@@ -18,6 +20,8 @@ public abstract class User {
 	}
 
 	protected void viewRoomsAll() {
+		System.out.println("Hotel RNTN View All Rooms");
+
 		String sql = "SELECT id, room_num, room_floor, sqft, price FROM room";
 
 		try {
@@ -50,6 +54,31 @@ public abstract class User {
 			BigDecimal price = rs.getBigDecimal("price");
 
 			System.out.printf("%-20d%-20s%-20d%-20d%-20.2f%n", id, roomNum, roomFloor, sqft, price);
+		}
+	}
+
+	protected void printReservations(ResultSet rs) throws SQLException {
+		System.out.printf("%-20s%-20s%n", "room id", "reserve date");
+
+		while (rs.next()) {
+			int room_id = rs.getInt("room_id");
+			Date reserve_date = rs.getDate("reserve_date");
+			SimpleDateFormat f = new SimpleDateFormat("MM-dd-yyyy");
+
+			System.out.printf("%-20d%-20s%n", room_id, f.format(reserve_date));
+		}
+	}
+
+	protected void printReservationRequests(ResultSet rs) throws SQLException {
+		System.out.printf("%-20s%-20s%-20s%n", "room id", "reserve date", "request");
+
+		while (rs.next()) {
+			int room_id = rs.getInt("room_id");
+			Date reserve_date = rs.getDate("reserve_date");
+			SimpleDateFormat f = new SimpleDateFormat("MM-dd-yyyy");
+			String request = rs.getString("request");
+
+			System.out.printf("%-20d%-20s%-20s%n", room_id, f.format(reserve_date), request);
 		}
 	}
 }
