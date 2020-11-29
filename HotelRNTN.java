@@ -10,6 +10,8 @@ public class HotelRNTN {
 	public static final Scanner SCANNER = new Scanner(System.in);
 	public static final int NEW_LINE_INTERVAL = 5;
 	public static final int SPACE_SIZE = 5;
+	public static final int DIVIDER_LENGTH = 100;
+	public static final String DIVIDER_STRING = new String(new char[DIVIDER_LENGTH]).replace("\0", "-");
 
 	public static void main(String[] args) {
 		try {
@@ -27,6 +29,7 @@ public class HotelRNTN {
 		String choice = "";
 
 		while (!choice.equals("3")) {
+			printDivider();
 			System.out.println("Hotel RNTN Main Menu");
 			printOptions(options);
 			choice = SCANNER.nextLine();
@@ -73,5 +76,9 @@ public class HotelRNTN {
 		format.append("%n");
 
 		System.out.printf(format.toString(), values);
+	}
+
+	public static void printDivider() {
+		System.out.println(DIVIDER_STRING);
 	}
 }

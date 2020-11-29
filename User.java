@@ -59,26 +59,28 @@ public abstract class User {
 
 	protected void printReservations(ResultSet rs) throws SQLException {
 		System.out.printf("%-20s%-20s%n", "room id", "reserve date");
+		SimpleDateFormat f = new SimpleDateFormat("MM-dd-yyyy");
 
 		while (rs.next()) {
-			int room_id = rs.getInt("room_id");
-			Date reserve_date = rs.getDate("reserve_date");
-			SimpleDateFormat f = new SimpleDateFormat("MM-dd-yyyy");
+			int roomId = rs.getInt("room_id");
+			Date reserveDate = rs.getDate("reserve_date");
+			String date = f.format(reserveDate);
 
-			System.out.printf("%-20d%-20s%n", room_id, f.format(reserve_date));
+			System.out.printf("%-20d%-20s%n", roomId, date);
 		}
 	}
 
 	protected void printReservationRequests(ResultSet rs) throws SQLException {
 		System.out.printf("%-20s%-20s%-20s%n", "room id", "reserve date", "request");
+		SimpleDateFormat f = new SimpleDateFormat("MM-dd-yyyy");
 
 		while (rs.next()) {
-			int room_id = rs.getInt("room_id");
-			Date reserve_date = rs.getDate("reserve_date");
-			SimpleDateFormat f = new SimpleDateFormat("MM-dd-yyyy");
+			int roomId = rs.getInt("room_id");
+			Date reserveDate = rs.getDate("reserve_date");
 			String request = rs.getString("request");
+			String date = f.format(reserveDate);
 
-			System.out.printf("%-20d%-20s%-20s%n", room_id, f.format(reserve_date), request);
+			System.out.printf("%-20d%-20s%-20s%n", roomId, date, request);
 		}
 	}
 }

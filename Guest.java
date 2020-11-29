@@ -17,6 +17,7 @@ public class Guest extends User {
 		String choice = "";
 
 		while (!choice.equals("3")) {
+			HotelRNTN.printDivider();
 			System.out.println("Hotel RNTN Guest Portal");
 			HotelRNTN.printOptions(options);
 			choice = scanner.nextLine();
@@ -118,6 +119,7 @@ public class Guest extends User {
 		String choice = "";
 
 		while (!choice.equals("12")) {
+			HotelRNTN.printDivider();
 			System.out.printf("Signed in as guest %s %s%n", firstName, lastName);
 			HotelRNTN.printOptions(options);
 			choice = scanner.nextLine();
