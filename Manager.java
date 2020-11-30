@@ -5,10 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Month;
+import java.util.Scanner;
 
 public class Manager extends User {
-	public Manager(Connection conn) {
-		super(conn);
+	public Manager(Connection conn, Scanner scanner) {
+		super(conn, scanner);
 	}
 
 	public void start() {
@@ -41,14 +42,14 @@ public class Manager extends User {
 		String password = promptInput("password", String.class);
 
 		String sql = "SELECT id, first_name, last_name FROM account where email = ? AND password = ? AND is_admin = TRUE";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, email);
 			pstmt.setString(2, password);
-			pstmt.executeQuery();
-
-			ResultSet rs = pstmt.getResultSet();
+			rs = pstmt.executeQuery();
 
 			if (rs.next()) {
 				id = rs.getInt("id");
@@ -63,6 +64,9 @@ public class Manager extends User {
 			default:
 				System.out.println("An error has occurred while signing in!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -123,12 +127,12 @@ public class Manager extends User {
 		System.out.println("Hotel RNTN Manager - View Reserved Rooms");
 
 		String sql = "SELECT id, room_num, room_floor, sqft, price FROM room WHERE id IN (SELECT room_id FROM reservation)";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.executeQuery();
-
-			ResultSet rs = pstmt.getResultSet();
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
 
 			if (!rs.isBeforeFirst()) {
 				System.out.println("There are no reserved rooms!");
@@ -140,6 +144,9 @@ public class Manager extends User {
 			default:
 				System.out.println("An error has occurred while viewing reserved rooms!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -164,9 +171,10 @@ public class Manager extends User {
 		}
 
 		String sql = "INSERT INTO room (room_num, room_floor, sqft, price) VALUES (?, ?, ?, ?)";
+		PreparedStatement pstmt = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, roomNumber);
 			pstmt.setInt(2, roomFloor);
 			pstmt.setInt(3, sqft);
@@ -182,6 +190,8 @@ public class Manager extends User {
 			default:
 				System.out.println("An error has occurred while creating the room!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -194,9 +204,10 @@ public class Manager extends User {
 		}
 
 		String sql = "DELETE FROM room WHERE id = ?";
+		PreparedStatement pstmt = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, id);
 			int deleted = pstmt.executeUpdate();
 
@@ -210,6 +221,8 @@ public class Manager extends User {
 			default:
 				System.out.println("An error has occurred while deleting the room!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -222,13 +235,13 @@ public class Manager extends User {
 		}
 
 		String sql = "SELECT COUNT(*) FROM reservation WHERE reserve_date = ?";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setDate(1, reserveDate);
-			pstmt.executeQuery();
-
-			ResultSet rs = pstmt.getResultSet();
+			rs = pstmt.executeQuery();
 			rs.next();
 
 			String date = dateFormat.format(reserveDate);
@@ -240,6 +253,9 @@ public class Manager extends User {
 			default:
 				System.out.println("An error has occurred while viewing number of reservations by date!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -252,14 +268,15 @@ public class Manager extends User {
 		}
 
 		String sql = "SELECT COUNT(*) FROM reservation WHERE room_id = ?";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, roomId);
-			pstmt.executeQuery();
-
-			ResultSet rs = pstmt.getResultSet();
+			rs = pstmt.executeQuery();
 			rs.next();
+
 			int count = rs.getInt("COUNT(*)");
 
 			System.out.printf("Reservations for room id %d: %d%n", roomId, count);
@@ -268,6 +285,9 @@ public class Manager extends User {
 			default:
 				System.out.println("An error has occurred while viewing number of reservations by room!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -275,12 +295,12 @@ public class Manager extends User {
 		System.out.println("Hotel RNTN Manager - View Popular Months");
 
 		String sql = "SELECT MONTH(reserve_date) FROM reservation GROUP BY MONTH(reserve_date) HAVING COUNT(*) >= 5";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.executeQuery();
-
-			ResultSet rs = pstmt.getResultSet();
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
 
 			if (!rs.isBeforeFirst()) {
 				System.out.println("There are no popular months!");
@@ -292,6 +312,9 @@ public class Manager extends User {
 			default:
 				System.out.println("An error has occurred while viewing popular months!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -299,12 +322,12 @@ public class Manager extends User {
 		System.out.println("Hotel RNTN Manager - View High-Activity Months");
 
 		String sql = "(SELECT MONTH(reserve_date) FROM canceled_reservation GROUP BY MONTH(reserve_date) HAVING COUNT(*) >= 3) UNION (SELECT MONTH(reserve_date) FROM reservation GROUP BY MONTH(reserve_date) HAVING COUNT(*) >= 3)";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.executeQuery();
-
-			ResultSet rs = pstmt.getResultSet();
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
 
 			if (!rs.isBeforeFirst()) {
 				System.out.println("There are no high-activity months!");
@@ -316,6 +339,9 @@ public class Manager extends User {
 			default:
 				System.out.println("An error has occurred while viewing high-activity months!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -323,12 +349,12 @@ public class Manager extends User {
 		System.out.println("Hotel RNTN Manager - View Recurring Guests");
 
 		String sql = "SELECT id, first_name, last_name FROM account WHERE (SELECT COUNT(*) FROM reservation WHERE account_id = id) >= 2";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.executeQuery();
-
-			ResultSet rs = pstmt.getResultSet();
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
 
 			if (!rs.isBeforeFirst()) {
 				System.out.println("There are no recurring guests!");
@@ -348,6 +374,9 @@ public class Manager extends User {
 			default:
 				System.out.println("An error has occurred while viewing recurring guests!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -355,12 +384,12 @@ public class Manager extends User {
 		System.out.println("Hotel RNTN Manager - View Unpopular Rooms");
 
 		String sql = "SELECT id, room_num, room_floor, sqft, price FROM room LEFT OUTER JOIN reservation ON id = room_id WHERE reserve_date IS NULL";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.executeQuery();
-
-			ResultSet rs = pstmt.getResultSet();
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
 
 			if (!rs.isBeforeFirst()) {
 				System.out.println("There are no unpopular rooms!");
@@ -372,6 +401,9 @@ public class Manager extends User {
 			default:
 				System.out.println("An error has occurred while viewing unpopular rooms!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 

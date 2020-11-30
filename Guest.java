@@ -4,10 +4,11 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Scanner;
 
 public class Guest extends User {
-	public Guest(Connection conn) {
-		super(conn);
+	public Guest(Connection conn, Scanner scanner) {
+		super(conn, scanner);
 	}
 
 	public void start() {
@@ -45,9 +46,10 @@ public class Guest extends User {
 		String password = promptInput("password", String.class);
 
 		String sql = "INSERT INTO account (email, password, first_name, last_name, is_admin) VALUES(?, ?, ?, ?, ?)";
+		PreparedStatement pstmt = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, email);
 			pstmt.setString(2, password);
 			pstmt.setString(3, firstName);
@@ -67,6 +69,8 @@ public class Guest extends User {
 			default:
 				System.out.println("An error has occurred while signing up!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -77,14 +81,14 @@ public class Guest extends User {
 		String password = promptInput("password", String.class);
 
 		String sql = "SELECT id, first_name, last_name FROM account where email = ? AND password = ? AND is_admin = FALSE";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, email);
 			pstmt.setString(2, password);
-			pstmt.executeQuery();
-
-			ResultSet rs = pstmt.getResultSet();
+			rs = pstmt.executeQuery();
 
 			if (rs.next()) {
 				id = rs.getInt("id");
@@ -100,6 +104,9 @@ public class Guest extends User {
 			default:
 				System.out.println("An error has occurred while signing in!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -173,14 +180,14 @@ public class Guest extends User {
 		}
 
 		String sql = "SELECT id, room_num, room_floor, sqft, price FROM room WHERE price >= ? AND price <= ?";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setBigDecimal(1, minPrice);
 			pstmt.setBigDecimal(2, maxPrice);
-			pstmt.executeQuery();
-
-			ResultSet rs = pstmt.getResultSet();
+			rs = pstmt.executeQuery();
 
 			if (!rs.isBeforeFirst()) {
 				System.out.println("There are no rooms for that price range!");
@@ -192,6 +199,9 @@ public class Guest extends User {
 			default:
 				System.out.println("An error has occurred while viewing rooms by price!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -209,14 +219,14 @@ public class Guest extends User {
 		}
 
 		String sql = "SELECT id, room_num, room_floor, sqft, price FROM room WHERE sqft >= ? AND sqft <= ?";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, minSqft);
 			pstmt.setInt(2, maxSqft);
-			pstmt.executeQuery();
-
-			ResultSet rs = pstmt.getResultSet();
+			rs = pstmt.executeQuery();
 
 			if (!rs.isBeforeFirst()) {
 				System.out.println("There are no rooms for that sqft range!");
@@ -228,6 +238,9 @@ public class Guest extends User {
 			default:
 				System.out.println("An error has occurred while viewing rooms by sqft!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -245,14 +258,14 @@ public class Guest extends User {
 		}
 
 		String sql = "SELECT id, room_num, room_floor, sqft, price FROM room WHERE room_floor >= ? AND room_floor <= ?";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, minFloor);
 			pstmt.setInt(2, maxFloor);
-			pstmt.executeQuery();
-
-			ResultSet rs = pstmt.getResultSet();
+			rs = pstmt.executeQuery();
 
 			if (!rs.isBeforeFirst()) {
 				System.out.println("There are no rooms for that floor range!");
@@ -264,6 +277,9 @@ public class Guest extends User {
 			default:
 				System.out.println("An error has occurred while viewing rooms by floor!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -271,13 +287,13 @@ public class Guest extends User {
 		System.out.println("Hotel RNTN Guest - View Reservations");
 
 		String sql = "SELECT room_id, reserve_date FROM reservation WHERE account_id = ?";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, id);
-			pstmt.executeQuery();
-
-			ResultSet rs = pstmt.getResultSet();
+			rs = pstmt.executeQuery();
 
 			if (!rs.isBeforeFirst()) {
 				System.out.println("You have no reservations!");
@@ -289,6 +305,9 @@ public class Guest extends User {
 			default:
 				System.out.println("An error has occurred while viewing reservations!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -306,9 +325,10 @@ public class Guest extends User {
 		}
 
 		String sql = "INSERT INTO reservation (account_id, room_id, reserve_date) VALUES (?, ?, ?)";
+		PreparedStatement pstmt = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, id);
 			pstmt.setInt(2, roomId);
 			pstmt.setDate(3, reserveDate);
@@ -329,6 +349,8 @@ public class Guest extends User {
 			default:
 				System.out.println("An error has occurred while creating the reservation!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -346,9 +368,10 @@ public class Guest extends User {
 		}
 
 		String sql = "DELETE FROM reservation WHERE account_id = ? AND room_id = ? AND reserve_date = ?";
+		PreparedStatement pstmt = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, id);
 			pstmt.setInt(2, roomId);
 			pstmt.setDate(3, reserveDate);
@@ -364,6 +387,8 @@ public class Guest extends User {
 			default:
 				System.out.println("An error has occurred while canceling the reservation!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -391,9 +416,10 @@ public class Guest extends User {
 		}
 
 		String sql = "UPDATE reservation SET room_id = ?, reserve_date = ? WHERE account_id = ? AND room_id = ? AND reserve_date = ?";
+		PreparedStatement pstmt = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, newRoomId);
 			pstmt.setDate(2, newReserveDate);
 			pstmt.setInt(3, id);
@@ -416,6 +442,8 @@ public class Guest extends User {
 			default:
 				System.out.println("An error has occurred while updating the reservation!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -423,11 +451,13 @@ public class Guest extends User {
 		System.out.println("Hotel RNTN Guest - View Reservation Requests");
 
 		String sql = "SELECT room_id, reserve_date, request FROM reservation_request NATURAL JOIN reservation WHERE account_id = ?";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, id);
-			ResultSet rs = pstmt.executeQuery();
+			rs = pstmt.executeQuery();
 
 			if (!rs.isBeforeFirst()) {
 				System.out.println("You have no reservation requests!");
@@ -439,6 +469,9 @@ public class Guest extends User {
 			default:
 				System.out.println("An error has occurred while viewing reservation requests!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
@@ -458,26 +491,29 @@ public class Guest extends User {
 		String request = promptInput("reservation request", String.class);
 
 		String sql1 = "SELECT * FROM reservation WHERE account_id = ? AND room_id = ? AND reserve_date = ?";
+		PreparedStatement pstmt1 = null;
+		ResultSet rs = null;
 
 		// Only create reservation request if requested by same guest as reservation
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql1);
-			pstmt.setInt(1, id);
-			pstmt.setInt(2, roomId);
-			pstmt.setDate(3, reserveDate);
-			ResultSet rs = pstmt.executeQuery();
+			pstmt1 = conn.prepareStatement(sql1);
+			pstmt1.setInt(1, id);
+			pstmt1.setInt(2, roomId);
+			pstmt1.setDate(3, reserveDate);
+			rs = pstmt1.executeQuery();
 
 			if (!rs.isBeforeFirst()) {
 				System.out.println("That reservation does not exist!");
 			} else {
 				String sql2 = "INSERT INTO reservation_request (room_id, reserve_date, request) VALUES (?, ?, ?)";
+				PreparedStatement pstmt2 = null;
 
 				try {
-					pstmt = conn.prepareStatement(sql2);
-					pstmt.setInt(1, roomId);
-					pstmt.setDate(2, reserveDate);
-					pstmt.setString(3, request);
-					pstmt.executeUpdate();
+					pstmt2 = conn.prepareStatement(sql2);
+					pstmt2.setInt(1, roomId);
+					pstmt2.setDate(2, reserveDate);
+					pstmt2.setString(3, request);
+					pstmt2.executeUpdate();
 
 					System.out.println("You have successfully created the reservation request!");
 				} catch (SQLException e) {
@@ -488,6 +524,8 @@ public class Guest extends User {
 					default:
 						System.out.println("An error has occurred while creating the reservation request!");
 					}
+				} finally {
+					HotelRNTN.closeQuietly(pstmt2);
 				}
 			}
 		} catch (SQLException e) {
@@ -495,6 +533,9 @@ public class Guest extends User {
 			default:
 				System.out.println("An error has occurred while creating the reservation request!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt1);
 		}
 	}
 
@@ -514,26 +555,29 @@ public class Guest extends User {
 		String request = promptInput("reservation request", String.class);
 
 		String sql1 = "SELECT * FROM reservation WHERE account_id = ? AND room_id = ? AND reserve_date = ?";
+		PreparedStatement pstmt1 = null;
+		ResultSet rs = null;
 
 		// Only delete reservation request if requested by same guest as reservation
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql1);
-			pstmt.setInt(1, id);
-			pstmt.setInt(2, roomId);
-			pstmt.setDate(3, reserveDate);
-			ResultSet rs = pstmt.executeQuery();
+			pstmt1 = conn.prepareStatement(sql1);
+			pstmt1.setInt(1, id);
+			pstmt1.setInt(2, roomId);
+			pstmt1.setDate(3, reserveDate);
+			rs = pstmt1.executeQuery();
 
 			if (!rs.isBeforeFirst()) {
 				System.out.println("That reservation does not exist!");
 			} else {
 				String sql2 = "DELETE FROM reservation_request WHERE room_id = ? AND reserve_date = ? AND request = ?";
+				PreparedStatement pstmt2 = null;
 
 				try {
-					pstmt = conn.prepareStatement(sql2);
-					pstmt.setInt(1, roomId);
-					pstmt.setDate(2, reserveDate);
-					pstmt.setString(3, request);
-					int deleted = pstmt.executeUpdate();
+					pstmt2 = conn.prepareStatement(sql2);
+					pstmt2.setInt(1, roomId);
+					pstmt2.setDate(2, reserveDate);
+					pstmt2.setString(3, request);
+					int deleted = pstmt2.executeUpdate();
 
 					if (deleted > 0) {
 						System.out.println("You have successfully canceled the reservation request!");
@@ -545,6 +589,8 @@ public class Guest extends User {
 					default:
 						System.out.println("An error has occurred while canceling the reservation request!");
 					}
+				} finally {
+					HotelRNTN.closeQuietly(pstmt2);
 				}
 			}
 		} catch (SQLException e) {
@@ -552,6 +598,9 @@ public class Guest extends User {
 			default:
 				System.out.println("An error has occurred while canceling the reservation request!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt1);
 		}
 	}
 }

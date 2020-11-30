@@ -15,9 +15,9 @@ public abstract class User {
 	protected String firstName;
 	protected String lastName;
 
-	protected User(Connection conn) {
+	protected User(Connection conn, Scanner scanner) {
 		this.conn = conn;
-		scanner = HotelRNTN.SCANNER;
+		this.scanner = scanner;
 		dateFormat = new SimpleDateFormat("MM-dd-yyyy");
 	}
 
@@ -48,12 +48,12 @@ public abstract class User {
 		System.out.println("Hotel RNTN - View All Rooms");
 
 		String sql = "SELECT id, room_num, room_floor, sqft, price FROM room";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.executeQuery();
-
-			ResultSet rs = pstmt.getResultSet();
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
 
 			if (!rs.isBeforeFirst()) {
 				System.out.println("There are no rooms!");
@@ -65,6 +65,9 @@ public abstract class User {
 			default:
 				System.out.println("An error has occurred while viewing all rooms!");
 			}
+		} finally {
+			HotelRNTN.closeQuietly(rs);
+			HotelRNTN.closeQuietly(pstmt);
 		}
 	}
 
