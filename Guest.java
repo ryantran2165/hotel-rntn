@@ -4,8 +4,6 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 public class Guest extends User {
 	public Guest(Connection conn) {
@@ -18,7 +16,7 @@ public class Guest extends User {
 
 		while (!choice.equals("3")) {
 			HotelRNTN.printDivider();
-			System.out.println("Hotel RNTN Guest Portal");
+			System.out.println("Hotel RNTN - Guest Portal");
 			HotelRNTN.printOptions(options);
 			choice = scanner.nextLine();
 
@@ -33,27 +31,21 @@ public class Guest extends User {
 				System.out.println("Thank you for using the Guest Portal!");
 				break;
 			default:
-				System.out.println("Invalid choice, please try again!");
+				System.out.println("Invalid choice!");
 			}
 		}
 	}
 
 	private void signUp() {
-		System.out.println("Hotel RNTN Guest Sign Up");
+		System.out.println("Hotel RNTN Guest - Sign Up");
 
-		System.out.print("Please enter first name: ");
-		String firstName = scanner.nextLine();
-
-		System.out.print("Please enter last name: ");
-		String lastName = scanner.nextLine();
-
-		System.out.print("Please enter email: ");
-		String email = scanner.nextLine();
-
-		System.out.print("Please enter password: ");
-		String password = scanner.nextLine();
+		String firstName = promptInput("first name", String.class);
+		String lastName = promptInput("last name", String.class);
+		String email = promptInput("email", String.class);
+		String password = promptInput("password", String.class);
 
 		String sql = "INSERT INTO account (email, password, first_name, last_name, is_admin) VALUES(?, ?, ?, ?, ?)";
+
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, email);
@@ -67,7 +59,10 @@ public class Guest extends User {
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
 			case 1062:
-				System.out.println("That email is already used, please use another one!");
+				System.out.println("That email is already used!");
+				break;
+			case 3819:
+				System.out.println("Fields cannot be empty!");
 				break;
 			default:
 				System.out.println("An error has occurred while signing up!");
@@ -76,13 +71,10 @@ public class Guest extends User {
 	}
 
 	private void signIn() {
-		System.out.println("Hotel RNTN Guest Sign In");
+		System.out.println("Hotel RNTN Guest - Sign In");
 
-		System.out.print("Please enter email: ");
-		String email = scanner.nextLine();
-
-		System.out.print("Please enter password: ");
-		String password = scanner.nextLine();
+		String email = promptInput("email", String.class);
+		String password = promptInput("password", String.class);
 
 		String sql = "SELECT id, first_name, last_name FROM account where email = ? AND password = ? AND is_admin = FALSE";
 
@@ -101,7 +93,7 @@ public class Guest extends User {
 
 				startSignedIn();
 			} else {
-				System.out.println("Invalid credentials, please try again!");
+				System.out.println("Invalid credentials!");
 			}
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
@@ -162,33 +154,21 @@ public class Guest extends User {
 				System.out.println("Signed out!");
 				break;
 			default:
-				System.out.println("Invalid choice, please try again!");
+				System.out.println("Invalid choice!");
 			}
 		}
 	}
 
 	private void viewRoomsPrice() {
-		System.out.println("Hotel RNTN Guest View Rooms by Price");
+		System.out.println("Hotel RNTN Guest - View Rooms by Price");
 
-		System.out.print("Please enter minimum price: ");
-		String minPrice = scanner.nextLine();
-		BigDecimal minPriceDec;
-
-		try {
-			minPriceDec = new BigDecimal(minPrice);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid minimum price, please try again!");
+		BigDecimal minPrice = promptInput("minimum price", BigDecimal.class);
+		if (minPrice == null) {
 			return;
 		}
 
-		System.out.print("Please enter maximum price: ");
-		String maxPrice = scanner.nextLine();
-		BigDecimal maxPriceDec;
-
-		try {
-			maxPriceDec = new BigDecimal(maxPrice);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid maximum price, please try again!");
+		BigDecimal maxPrice = promptInput("maximum price", BigDecimal.class);
+		if (maxPrice == null) {
 			return;
 		}
 
@@ -196,8 +176,8 @@ public class Guest extends User {
 
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setBigDecimal(1, minPriceDec);
-			pstmt.setBigDecimal(2, maxPriceDec);
+			pstmt.setBigDecimal(1, minPrice);
+			pstmt.setBigDecimal(2, maxPrice);
 			pstmt.executeQuery();
 
 			ResultSet rs = pstmt.getResultSet();
@@ -216,27 +196,15 @@ public class Guest extends User {
 	}
 
 	private void viewRoomsSqft() {
-		System.out.println("Hotel RNTN Guest View Rooms by Sqft");
+		System.out.println("Hotel RNTN Guest - View Rooms by Sqft");
 
-		System.out.print("Please enter minimum sqft: ");
-		String minSqft = scanner.nextLine();
-		int minSqftInt;
-
-		try {
-			minSqftInt = Integer.parseInt(minSqft);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid minimum sqft, please try again!");
+		Integer minSqft = promptInput("minimum sqft", Integer.class);
+		if (minSqft == null) {
 			return;
 		}
 
-		System.out.print("Please enter maximum sqft: ");
-		String maxSqft = scanner.nextLine();
-		int maxSqftInt;
-
-		try {
-			maxSqftInt = Integer.parseInt(maxSqft);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid maximum sqft, please try again!");
+		Integer maxSqft = promptInput("maximum sqft", Integer.class);
+		if (maxSqft == null) {
 			return;
 		}
 
@@ -244,8 +212,8 @@ public class Guest extends User {
 
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, minSqftInt);
-			pstmt.setInt(2, maxSqftInt);
+			pstmt.setInt(1, minSqft);
+			pstmt.setInt(2, maxSqft);
 			pstmt.executeQuery();
 
 			ResultSet rs = pstmt.getResultSet();
@@ -264,27 +232,15 @@ public class Guest extends User {
 	}
 
 	private void viewRoomsFloor() {
-		System.out.println("Hotel RNTN Guest View Rooms by Floor");
+		System.out.println("Hotel RNTN Guest - View Rooms by Floor");
 
-		System.out.print("Please enter minimum floor: ");
-		String minFloor = scanner.nextLine();
-		int minFloorInt;
-
-		try {
-			minFloorInt = Integer.parseInt(minFloor);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid minimum floor, please try again!");
+		Integer minFloor = promptInput("minimum floor", Integer.class);
+		if (minFloor == null) {
 			return;
 		}
 
-		System.out.print("Please enter maximum floor: ");
-		String maxFloor = scanner.nextLine();
-		int maxFloorInt;
-
-		try {
-			maxFloorInt = Integer.parseInt(maxFloor);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid maximum floor, please try again!");
+		Integer maxFloor = promptInput("max floor", Integer.class);
+		if (maxFloor == null) {
 			return;
 		}
 
@@ -292,8 +248,8 @@ public class Guest extends User {
 
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, minFloorInt);
-			pstmt.setInt(2, maxFloorInt);
+			pstmt.setInt(1, minFloor);
+			pstmt.setInt(2, maxFloor);
 			pstmt.executeQuery();
 
 			ResultSet rs = pstmt.getResultSet();
@@ -312,7 +268,7 @@ public class Guest extends User {
 	}
 
 	private void viewReservations() {
-		System.out.println("Hotel RNTN View Reservations");
+		System.out.println("Hotel RNTN Guest - View Reservations");
 
 		String sql = "SELECT room_id, reserve_date FROM reservation WHERE account_id = ?";
 
@@ -337,29 +293,15 @@ public class Guest extends User {
 	}
 
 	private void createReservation() {
-		System.out.println("Hotel RNTN Create Reservation");
+		System.out.println("Hotel RNTN Guest - Create Reservation");
 
-		System.out.print("Please enter room id: ");
-		String roomId = scanner.nextLine();
-		int roomIdInt;
-
-		try {
-			roomIdInt = Integer.parseInt(roomId);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid room id, please try again!");
+		Integer roomId = promptInput("room id", Integer.class);
+		if (roomId == null) {
 			return;
 		}
 
-		System.out.print("Please enter reservation date (mm-dd-yyyy): ");
-		String date = scanner.nextLine();
-		SimpleDateFormat f = new SimpleDateFormat("MM-dd-yyyy");
-		Date reserveDate;
-
-		try {
-			long ms = f.parse(date).getTime();
-			reserveDate = new Date(ms);
-		} catch (ParseException e) {
-			System.out.println("Invalid date, please try again!");
+		Date reserveDate = promptInput("reserve date (mm-dd-yyyy)", Date.class);
+		if (reserveDate == null) {
 			return;
 		}
 
@@ -368,13 +310,22 @@ public class Guest extends User {
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, id);
-			pstmt.setInt(2, roomIdInt);
+			pstmt.setInt(2, roomId);
 			pstmt.setDate(3, reserveDate);
 			pstmt.executeUpdate();
 
 			System.out.println("You have successfully created the reservation!");
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
+			case 1062:
+				System.out.println("You already have this reservation!");
+				break;
+			case 1452:
+				System.out.println("That room does not exist!");
+				break;
+			case 1644:
+				System.out.println("That date already passed!");
+				break;
 			default:
 				System.out.println("An error has occurred while creating the reservation!");
 			}
@@ -382,29 +333,15 @@ public class Guest extends User {
 	}
 
 	private void cancelReservation() {
-		System.out.println("Hotel RNTN Cancel Reservation");
+		System.out.println("Hotel RNTN Guest - Cancel Reservation");
 
-		System.out.print("Please enter room id: ");
-		String roomId = scanner.nextLine();
-		int roomIdInt;
-
-		try {
-			roomIdInt = Integer.parseInt(roomId);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid room id, please try again!");
+		Integer roomId = promptInput("room id", Integer.class);
+		if (roomId == null) {
 			return;
 		}
 
-		System.out.print("Please enter reservation date (mm-dd-yyyy): ");
-		String date = scanner.nextLine();
-		SimpleDateFormat f = new SimpleDateFormat("MM-dd-yyyy");
-		Date reserveDate;
-
-		try {
-			long ms = f.parse(date).getTime();
-			reserveDate = new Date(ms);
-		} catch (ParseException e) {
-			System.out.println("Invalid date, please try again!");
+		Date reserveDate = promptInput("reserve date (mm-dd-yyyy)", Date.class);
+		if (reserveDate == null) {
 			return;
 		}
 
@@ -413,11 +350,15 @@ public class Guest extends User {
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, id);
-			pstmt.setInt(2, roomIdInt);
+			pstmt.setInt(2, roomId);
 			pstmt.setDate(3, reserveDate);
-			pstmt.executeUpdate();
+			int deleted = pstmt.executeUpdate();
 
-			System.out.println("You have successfully canceled the reservation!");
+			if (deleted > 0) {
+				System.out.println("You have successfully canceled the reservation!");
+			} else {
+				System.out.println("That reservation does not exist!");
+			}
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
 			default:
@@ -427,52 +368,25 @@ public class Guest extends User {
 	}
 
 	private void updateReservation() {
-		System.out.println("Hotel RNTN Update Reservation");
+		System.out.println("Hotel RNTN Guest - Update Reservation");
 
-		System.out.print("Please enter room id: ");
-		String roomId = scanner.nextLine();
-		int roomIdInt;
-
-		try {
-			roomIdInt = Integer.parseInt(roomId);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid room id, please try again!");
+		Integer roomId = promptInput("room id", Integer.class);
+		if (roomId == null) {
 			return;
 		}
 
-		System.out.print("Please enter reservation date (mm-dd-yyyy): ");
-		String date = scanner.nextLine();
-		SimpleDateFormat f = new SimpleDateFormat("MM-dd-yyyy");
-		Date reserveDate;
-
-		try {
-			long ms = f.parse(date).getTime();
-			reserveDate = new Date(ms);
-		} catch (ParseException e) {
-			System.out.println("Invalid date, please try again!");
+		Date reserveDate = promptInput("reserve date (mm-dd-yyyy)", Date.class);
+		if (reserveDate == null) {
 			return;
 		}
 
-		System.out.print("Please enter new room id: ");
-		String newRoomId = scanner.nextLine();
-		int newRoomIdInt;
-
-		try {
-			newRoomIdInt = Integer.parseInt(newRoomId);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid room id, please try again!");
+		Integer newRoomId = promptInput("new room id", Integer.class);
+		if (newRoomId == null) {
 			return;
 		}
 
-		System.out.print("Please enter reservation date (mm-dd-yyyy): ");
-		String newDate = scanner.nextLine();
-		Date newReserveDate;
-
-		try {
-			long ms = f.parse(newDate).getTime();
-			newReserveDate = new Date(ms);
-		} catch (ParseException e) {
-			System.out.println("Invalid date, please try again!");
+		Date newReserveDate = promptInput("new reserve date (mm-dd-yyyy)", Date.class);
+		if (newReserveDate == null) {
 			return;
 		}
 
@@ -480,16 +394,25 @@ public class Guest extends User {
 
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, newRoomIdInt);
+			pstmt.setInt(1, newRoomId);
 			pstmt.setDate(2, newReserveDate);
 			pstmt.setInt(3, id);
-			pstmt.setInt(4, roomIdInt);
+			pstmt.setInt(4, roomId);
 			pstmt.setDate(5, reserveDate);
 			pstmt.executeUpdate();
 
 			System.out.println("You have successfully updated the reservation!");
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
+			case 1062:
+				System.out.println("You already have this reservation!");
+				break;
+			case 1452:
+				System.out.println("That room does not exist!");
+				break;
+			case 1644:
+				System.out.println("That date already passed!");
+				break;
 			default:
 				System.out.println("An error has occurred while updating the reservation!");
 			}
@@ -497,7 +420,7 @@ public class Guest extends User {
 	}
 
 	private void viewReservationRequests() {
-		System.out.println("Hotel RNTN View Reservation Requests");
+		System.out.println("Hotel RNTN Guest - View Reservation Requests");
 
 		String sql = "SELECT room_id, reserve_date, request FROM reservation_request WHERE account_id = ?";
 
@@ -522,41 +445,26 @@ public class Guest extends User {
 	}
 
 	private void createReservationRequest() {
-		System.out.println("Hotel RNTN Create Reservation Request");
+		System.out.println("Hotel RNTN Guest - Create Reservation Request");
 
-		System.out.print("Please enter room id: ");
-		String roomId = scanner.nextLine();
-		int roomIdInt;
-
-		try {
-			roomIdInt = Integer.parseInt(roomId);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid room id, please try again!");
+		Integer roomId = promptInput("room id", Integer.class);
+		if (roomId == null) {
 			return;
 		}
 
-		System.out.print("Please enter reservation date (mm-dd-yyyy): ");
-		String date = scanner.nextLine();
-		SimpleDateFormat f = new SimpleDateFormat("MM-dd-yyyy");
-		Date reserveDate;
-
-		try {
-			long ms = f.parse(date).getTime();
-			reserveDate = new Date(ms);
-		} catch (ParseException e) {
-			System.out.println("Invalid date, please try again!");
+		Date reserveDate = promptInput("reserve date (mm-dd-yyyy)", Date.class);
+		if (reserveDate == null) {
 			return;
 		}
 
-		System.out.print("Please enter reservation request: ");
-		String request = scanner.nextLine();
+		String request = promptInput("reservation request", String.class);
 
 		String sql = "INSERT INTO reservation_request (account_id, room_id, reserve_date, request) VALUES (?, ?, ?, ?)";
 
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, id);
-			pstmt.setInt(2, roomIdInt);
+			pstmt.setInt(2, roomId);
 			pstmt.setDate(3, reserveDate);
 			pstmt.setString(4, request);
 			pstmt.executeUpdate();
@@ -564,6 +472,12 @@ public class Guest extends User {
 			System.out.println("You have successfully created the reservation request!");
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
+			case 1062:
+				System.out.println("You already have this reservation request!");
+				break;
+			case 1452:
+				System.out.println("That reservation does not exist!");
+				break;
 			default:
 				System.out.println("An error has occurred while creating the reservation request!");
 			}
@@ -571,46 +485,35 @@ public class Guest extends User {
 	}
 
 	private void cancelReservationRequest() {
-		System.out.println("Hotel RNTN Cancel Reservation Request");
+		System.out.println("Hotel RNTN Guest - Cancel Reservation Request");
 
-		System.out.print("Please enter room id: ");
-		String roomId = scanner.nextLine();
-		int roomIdInt;
-
-		try {
-			roomIdInt = Integer.parseInt(roomId);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid room id, please try again!");
+		Integer roomId = promptInput("room id", Integer.class);
+		if (roomId == null) {
 			return;
 		}
 
-		System.out.print("Please enter reservation date (mm-dd-yyyy): ");
-		String date = scanner.nextLine();
-		SimpleDateFormat f = new SimpleDateFormat("MM-dd-yyyy");
-		Date reserveDate;
-
-		try {
-			long ms = f.parse(date).getTime();
-			reserveDate = new Date(ms);
-		} catch (ParseException e) {
-			System.out.println("Invalid date, please try again!");
+		Date reserveDate = promptInput("reserve date (mm-dd-yyyy)", Date.class);
+		if (reserveDate == null) {
 			return;
 		}
 
-		System.out.print("Please enter reservation request: ");
-		String request = scanner.nextLine();
+		String request = promptInput("reservation request", String.class);
 
 		String sql = "DELETE FROM reservation_request WHERE account_id = ? AND room_id = ? AND reserve_date = ? AND request = ?";
 
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, id);
-			pstmt.setInt(2, roomIdInt);
+			pstmt.setInt(2, roomId);
 			pstmt.setDate(3, reserveDate);
 			pstmt.setString(4, request);
-			pstmt.executeUpdate();
+			int deleted = pstmt.executeUpdate();
 
-			System.out.println("You have successfully canceled the reservation request!");
+			if (deleted > 0) {
+				System.out.println("You have successfully canceled the reservation request!");
+			} else {
+				System.out.println("That reservation request does not exist!");
+			}
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
 			default:

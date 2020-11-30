@@ -10,17 +10,42 @@ import java.util.Scanner;
 public abstract class User {
 	protected Connection conn;
 	protected Scanner scanner;
+	protected SimpleDateFormat dateFormat;
 	protected int id;
 	protected String firstName;
 	protected String lastName;
 
-	public User(Connection conn) {
+	protected User(Connection conn) {
 		this.conn = conn;
 		scanner = HotelRNTN.SCANNER;
+		dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+	}
+
+	@SuppressWarnings("unchecked")
+	protected <T> T promptInput(String label, Class<T> type) {
+		System.out.print("Please enter " + label + ": ");
+		String value = scanner.nextLine();
+
+		try {
+			if (type == String.class) {
+				return (T) value;
+			} else if (type == BigDecimal.class) {
+				return (T) new BigDecimal(value);
+			} else if (type == Integer.class) {
+				return (T) new Integer(value);
+			} else if (type == Date.class) {
+				long ms = dateFormat.parse(value).getTime();
+				return (T) new Date(ms);
+			}
+			return null;
+		} catch (Exception e) {
+			System.out.println("Invalid " + label + " format!");
+			return null;
+		}
 	}
 
 	protected void viewRoomsAll() {
-		System.out.println("Hotel RNTN View All Rooms");
+		System.out.println("Hotel RNTN - View All Rooms");
 
 		String sql = "SELECT id, room_num, room_floor, sqft, price FROM room";
 
@@ -59,12 +84,11 @@ public abstract class User {
 
 	protected void printReservations(ResultSet rs) throws SQLException {
 		System.out.printf("%-20s%-20s%n", "room id", "reserve date");
-		SimpleDateFormat f = new SimpleDateFormat("MM-dd-yyyy");
 
 		while (rs.next()) {
 			int roomId = rs.getInt("room_id");
 			Date reserveDate = rs.getDate("reserve_date");
-			String date = f.format(reserveDate);
+			String date = dateFormat.format(reserveDate);
 
 			System.out.printf("%-20d%-20s%n", roomId, date);
 		}
@@ -72,13 +96,12 @@ public abstract class User {
 
 	protected void printReservationRequests(ResultSet rs) throws SQLException {
 		System.out.printf("%-20s%-20s%-20s%n", "room id", "reserve date", "request");
-		SimpleDateFormat f = new SimpleDateFormat("MM-dd-yyyy");
 
 		while (rs.next()) {
 			int roomId = rs.getInt("room_id");
 			Date reserveDate = rs.getDate("reserve_date");
 			String request = rs.getString("request");
-			String date = f.format(reserveDate);
+			String date = dateFormat.format(reserveDate);
 
 			System.out.printf("%-20d%-20s%-20s%n", roomId, date, request);
 		}

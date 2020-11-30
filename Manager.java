@@ -4,8 +4,6 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Month;
 
 public class Manager extends User {
@@ -19,7 +17,7 @@ public class Manager extends User {
 
 		while (!choice.equals("2")) {
 			HotelRNTN.printDivider();
-			System.out.println("Hotel RNTN Manager Portal");
+			System.out.println("Hotel RNTN - Manager Portal");
 			HotelRNTN.printOptions(options);
 			choice = scanner.nextLine();
 
@@ -31,21 +29,19 @@ public class Manager extends User {
 				System.out.println("Thank you for using the Manager Portal!");
 				break;
 			default:
-				System.out.println("Invalid choice, please try again!");
+				System.out.println("Invalid choice!");
 			}
 		}
 	}
 
 	private void signIn() {
-		System.out.println("Hotel RNTN Manager Sign In");
+		System.out.println("Hotel RNTN Manager - Sign In");
 
-		System.out.print("Please enter email: ");
-		String email = scanner.nextLine();
-
-		System.out.print("Please enter password: ");
-		String password = scanner.nextLine();
+		String email = promptInput("email", String.class);
+		String password = promptInput("password", String.class);
 
 		String sql = "SELECT id, first_name, last_name FROM account where email = ? AND password = ? AND is_admin = TRUE";
+
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, email);
@@ -60,7 +56,7 @@ public class Manager extends User {
 				lastName = rs.getString("last_name");
 				startSignedIn();
 			} else {
-				System.out.println("Invalid credentials, please try again!");
+				System.out.println("Invalid credentials!");
 			}
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
@@ -72,8 +68,9 @@ public class Manager extends User {
 
 	private void startSignedIn() {
 		String[] options = { "[1] View All Rooms", "[2] View Reserved Rooms", "[3] Create Room", "[4] Delete Room",
-				"[5] Number of Reservations by Date", "[6] Number of Reservations by Room", "[7] Popular Months",
-				"[8] High-Activity Months", "[9] Recurring Guests", "[10] Unpopular Rooms", "[11] Sign Out" };
+				"[5] View Number of Reservations by Date", "[6] View Number of Reservations by Room",
+				"[7] View Popular Months", "[8] View High-Activity Months", "[9] View Recurring Guests",
+				"[10] View Unpopular Rooms", "[11] Sign Out" };
 		String choice = "";
 
 		while (!choice.equals("11")) {
@@ -96,34 +93,34 @@ public class Manager extends User {
 				deleteRoom();
 				break;
 			case "5":
-				numberReservationsDate();
+				viewNumberReservationsDate();
 				break;
 			case "6":
-				numberReservationsRoom();
+				viewNumberReservationsRoom();
 				break;
 			case "7":
-				popularMonths();
+				viewPopularMonths();
 				break;
 			case "8":
-				highActivityMonths();
+				viewHighActivityMonths();
 				break;
 			case "9":
-				recurringGuests();
+				viewRecurringGuests();
 				break;
 			case "10":
-				unpopularRooms();
+				viewUnpopularRooms();
 				break;
 			case "11":
 				System.out.println("Signed out!");
 				break;
 			default:
-				System.out.println("Invalid choice, please try again!");
+				System.out.println("Invalid choice!");
 			}
 		}
 	}
 
 	private void viewReservedRooms() {
-		System.out.println("Hotel RNTN Manager View Reserved Rooms");
+		System.out.println("Hotel RNTN Manager - View Reserved Rooms");
 
 		String sql = "SELECT id, room_num, room_floor, sqft, price FROM room WHERE id IN (SELECT room_id FROM reservation)";
 
@@ -147,41 +144,22 @@ public class Manager extends User {
 	}
 
 	private void createRoom() {
-		System.out.println("Hotel RNTN Manager Create Room");
+		System.out.println("Hotel RNTN Manager - Create Room");
 
-		System.out.print("Please enter room number: ");
-		String roomNumber = scanner.nextLine();
+		String roomNumber = promptInput("room number", String.class);
 
-		System.out.print("Please enter room floor: ");
-		String roomFloor = scanner.nextLine();
-		int roomFloorInt;
-
-		try {
-			roomFloorInt = Integer.parseInt(roomFloor);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid room floor, please try again!");
+		Integer roomFloor = promptInput("room floor", Integer.class);
+		if (roomFloor == null) {
 			return;
 		}
 
-		System.out.print("Please enter room sqft: ");
-		String sqft = scanner.nextLine();
-		int sqftInt;
-
-		try {
-			sqftInt = Integer.parseInt(sqft);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid sqft, please try again!");
+		Integer sqft = promptInput("sqft", Integer.class);
+		if (sqft == null) {
 			return;
 		}
 
-		System.out.print("Please enter room price: ");
-		String price = scanner.nextLine();
-		BigDecimal priceDec;
-
-		try {
-			priceDec = new BigDecimal(price);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid price, please try again!");
+		BigDecimal price = promptInput("price", BigDecimal.class);
+		if (price == null) {
 			return;
 		}
 
@@ -190,32 +168,28 @@ public class Manager extends User {
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, roomNumber);
-			pstmt.setInt(2, roomFloorInt);
-			pstmt.setInt(3, sqftInt);
-			pstmt.setBigDecimal(4, priceDec);
+			pstmt.setInt(2, roomFloor);
+			pstmt.setInt(3, sqft);
+			pstmt.setBigDecimal(4, price);
 			pstmt.executeUpdate();
 
 			System.out.println("You have successfully created the room!");
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
+			case 1062:
+				System.out.println("That room number is already used, please use another one!");
+				break;
 			default:
-				e.printStackTrace();
 				System.out.println("An error has occurred while creating the room!");
 			}
 		}
 	}
 
 	private void deleteRoom() {
-		System.out.println("Hotel RNTN Manager Delete Room");
+		System.out.println("Hotel RNTN Manager - Delete Room");
 
-		System.out.print("Please enter room id: ");
-		String id = scanner.nextLine();
-		int idInt;
-
-		try {
-			idInt = Integer.parseInt(id);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid id, please try again!");
+		Integer id = promptInput("room id", Integer.class);
+		if (id == null) {
 			return;
 		}
 
@@ -223,32 +197,27 @@ public class Manager extends User {
 
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, idInt);
-			pstmt.executeUpdate();
+			pstmt.setInt(1, id);
+			int deleted = pstmt.executeUpdate();
 
-			System.out.println("You have successfully deleted the room!");
+			if (deleted > 0) {
+				System.out.println("You have successfully deleted the room!");
+			} else {
+				System.out.println("That room does not exist!");
+			}
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
 			default:
-				e.printStackTrace();
 				System.out.println("An error has occurred while deleting the room!");
 			}
 		}
 	}
 
-	private void numberReservationsDate() {
-		System.out.println("Hotel RNTN Manager Number of Reservations by Date");
+	private void viewNumberReservationsDate() {
+		System.out.println("Hotel RNTN Manager - View Number of Reservations by Date");
 
-		System.out.print("Please enter reservation date (mm-dd-yyyy): ");
-		String date = scanner.nextLine();
-		SimpleDateFormat f = new SimpleDateFormat("MM-dd-yyyy");
-		Date reserveDate;
-
-		try {
-			long ms = f.parse(date).getTime();
-			reserveDate = new Date(ms);
-		} catch (ParseException e) {
-			System.out.println("Invalid date, please try again!");
+		Date reserveDate = promptInput("reserve date (mm-dd-yyyy)", Date.class);
+		if (reserveDate == null) {
 			return;
 		}
 
@@ -261,8 +230,9 @@ public class Manager extends User {
 
 			ResultSet rs = pstmt.getResultSet();
 			rs.next();
+
+			String date = dateFormat.format(reserveDate);
 			int count = rs.getInt("COUNT(*)");
-			date = f.format(reserveDate);
 
 			System.out.printf("Reservations on %s: %d%n", date, count);
 		} catch (SQLException e) {
@@ -273,17 +243,11 @@ public class Manager extends User {
 		}
 	}
 
-	private void numberReservationsRoom() {
-		System.out.println("Hotel RNTN Manager Number of Reservations by Room");
+	private void viewNumberReservationsRoom() {
+		System.out.println("Hotel RNTN Manager - View Number of Reservations by Room");
 
-		System.out.print("Please enter room id: ");
-		String roomId = scanner.nextLine();
-		int roomIdInt;
-
-		try {
-			roomIdInt = Integer.parseInt(roomId);
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid room id, please try again!");
+		Integer roomId = promptInput("room id", Integer.class);
+		if (roomId == null) {
 			return;
 		}
 
@@ -291,14 +255,14 @@ public class Manager extends User {
 
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, roomIdInt);
+			pstmt.setInt(1, roomId);
 			pstmt.executeQuery();
 
 			ResultSet rs = pstmt.getResultSet();
 			rs.next();
 			int count = rs.getInt("COUNT(*)");
 
-			System.out.printf("Reservations for room id %d: %d%n", roomIdInt, count);
+			System.out.printf("Reservations for room id %d: %d%n", roomId, count);
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
 			default:
@@ -307,8 +271,8 @@ public class Manager extends User {
 		}
 	}
 
-	private void popularMonths() {
-		System.out.println("Hotel RNTN Manager Popular Months");
+	private void viewPopularMonths() {
+		System.out.println("Hotel RNTN Manager - View Popular Months");
 
 		String sql = "SELECT MONTH(reserve_date) FROM reservation GROUP BY MONTH(reserve_date) HAVING COUNT(*) >= 5";
 
@@ -331,8 +295,8 @@ public class Manager extends User {
 		}
 	}
 
-	private void highActivityMonths() {
-		System.out.println("Hotel RNTN Manager High-Activity Months");
+	private void viewHighActivityMonths() {
+		System.out.println("Hotel RNTN Manager - View High-Activity Months");
 
 		String sql = "(SELECT MONTH(reserve_date) FROM canceled_reservation GROUP BY MONTH(reserve_date) HAVING COUNT(*) >= 3) UNION (SELECT MONTH(reserve_date) FROM reservation GROUP BY MONTH(reserve_date) HAVING COUNT(*) >= 3)";
 
@@ -355,8 +319,8 @@ public class Manager extends User {
 		}
 	}
 
-	private void recurringGuests() {
-		System.out.println("Hotel RNTN Manager Recurring Guests");
+	private void viewRecurringGuests() {
+		System.out.println("Hotel RNTN Manager - View Recurring Guests");
 
 		String sql = "SELECT id, first_name, last_name FROM account WHERE (SELECT COUNT(*) FROM reservation WHERE account_id = id) >= 2";
 
@@ -387,8 +351,8 @@ public class Manager extends User {
 		}
 	}
 
-	private void unpopularRooms() {
-		System.out.println("Hotel RNTN Manager Unpopular Rooms");
+	private void viewUnpopularRooms() {
+		System.out.println("Hotel RNTN Manager - View Unpopular Rooms");
 
 		String sql = "SELECT id, room_num, room_floor, sqft, price FROM room LEFT OUTER JOIN reservation ON id = room_id WHERE reserve_date IS NULL";
 

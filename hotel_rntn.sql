@@ -5,17 +5,17 @@ USE hotel_rntn;
 CREATE TABLE account (
   PRIMARY KEY (id),
   id         MEDIUMINT UNSIGNED AUTO_INCREMENT,
-  email      VARCHAR(255) NOT NULL UNIQUE,
-  password   VARCHAR(32)  NOT NULL,
-  first_name VARCHAR(255) NOT NULL,
-  last_name  VARCHAR(255) NOT NULL,
+  email      VARCHAR(255) NOT NULL UNIQUE CHECK (email <> ''),
+  password   VARCHAR(32)  NOT NULL        CHECK (password <> ''),
+  first_name VARCHAR(255) NOT NULL        CHECK (first_name <> ''),
+  last_name  VARCHAR(255) NOT NULL        CHECK (last_name <> ''),
   is_admin   BOOLEAN      NOT NULL
 );
 
 CREATE TABLE room (
   PRIMARY KEY (id),
   id         SMALLINT UNSIGNED AUTO_INCREMENT,
-  room_num   VARCHAR(16)        NOT NULL,
+  room_num   VARCHAR(16)        NOT NULL UNIQUE CHECK (room_num <> ''),
   room_floor TINYINT  UNSIGNED  NOT NULL,
   sqft       SMALLINT UNSIGNED  NOT NULL,
   price      DECIMAL(6, 2)      NOT NULL
@@ -45,7 +45,7 @@ CREATE TABLE reservation_request (
                FOREIGN KEY (account_id, room_id, reserve_date)
                REFERENCES reservation(account_id, room_id, reserve_date)
                ON DELETE CASCADE,
-  request      VARCHAR(255)        NOT NULL
+  request      VARCHAR(255)        NOT NULL CHECK (request <> '')
 );
 
 CREATE TABLE canceled_reservation (
@@ -118,3 +118,18 @@ BEFORE INSERT ON reservation
    END IF;
  END;//
 DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER trig_reservation_update
+BEFORE UPDATE ON reservation
+   FOR EACH ROW
+ BEGIN
+   IF (NEW.reserve_date < CURRENT_DATE) THEN
+     SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'reservation date before current date';
+   END IF;
+ END;//
+DELIMITER ;
+
+INSERT INTO account (email, password, first_name, last_name, is_admin)
+VALUES ('admin@gmail.com', 'pass', 'John', 'Doe', TRUE);

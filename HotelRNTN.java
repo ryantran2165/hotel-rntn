@@ -30,7 +30,7 @@ public class HotelRNTN {
 
 		while (!choice.equals("3")) {
 			printDivider();
-			System.out.println("Hotel RNTN Main Menu");
+			System.out.println("Hotel RNTN - Main Menu");
 			printOptions(options);
 			choice = SCANNER.nextLine();
 
@@ -48,7 +48,7 @@ public class HotelRNTN {
 				SCANNER.close();
 				System.exit(0);
 			default:
-				System.out.println("Invalid choice, please try again!");
+				System.out.println("Invalid choice!");
 			}
 		}
 	}
