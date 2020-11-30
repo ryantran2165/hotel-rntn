@@ -22,7 +22,7 @@ CREATE TABLE room (
 );
 
 CREATE TABLE reservation (
-  PRIMARY KEY (account_id, room_id, reserve_date),
+  PRIMARY KEY (room_id, reserve_date),
   account_id   MEDIUMINT UNSIGNED  NOT NULL,
                FOREIGN KEY (account_id)
                REFERENCES account(id)
@@ -38,12 +38,11 @@ CREATE TABLE reservation (
 );
 
 CREATE TABLE reservation_request (
-  PRIMARY KEY (account_id, room_id, reserve_date, request),
-  account_id   MEDIUMINT UNSIGNED  NOT NULL,
+  PRIMARY KEY (room_id, reserve_date, request),
   room_id      SMALLINT  UNSIGNED  NOT NULL,
   reserve_date DATE                NOT NULL,
-               FOREIGN KEY (account_id, room_id, reserve_date)
-               REFERENCES reservation(account_id, room_id, reserve_date)
+               FOREIGN KEY (room_id, reserve_date)
+               REFERENCES reservation(room_id, reserve_date)
                ON DELETE CASCADE,
   request      VARCHAR(255)        NOT NULL CHECK (request <> '')
 );
@@ -63,7 +62,7 @@ CREATE TABLE canceled_reservation (
 );
 
 CREATE TABLE reservation_archive (
-  PRIMARY KEY (account_id, room_id, reserve_date, updated_at),
+  PRIMARY KEY (room_id, reserve_date),
   account_id   MEDIUMINT UNSIGNED  NOT NULL,
                FOREIGN KEY (account_id)
                REFERENCES account(id)
@@ -82,7 +81,7 @@ DELIMITER //
 CREATE PROCEDURE proc_archive_reservation(IN cutoff DATE)
  BEGIN
    INSERT INTO reservation_archive
-          (SELECT account_id, room_id, reserve_date, updated_at
+          (SELECT *
              FROM reservation
             WHERE DATE(updated_at) < cutoff);
    DELETE FROM reservation
@@ -132,4 +131,11 @@ BEFORE UPDATE ON reservation
 DELIMITER ;
 
 INSERT INTO account (email, password, first_name, last_name, is_admin)
-VALUES ('admin@gmail.com', 'pass', 'John', 'Doe', TRUE);
+VALUES ('admin@gmail.com', 'pass', 'John', 'Doe', TRUE),
+       ('john@gmail.com', 'pass', 'John', 'Doe', FALSE),
+       ('jane@gmail.com', 'pass', 'Jane', 'Doe', FALSE);
+
+INSERT INTO room (room_num, room_floor, sqft, price)
+VALUES ('1a', 1, 300, 49.99),
+       ('1b', 1, 325, 59.99),
+       ('2a', 2, 400, 69.99);

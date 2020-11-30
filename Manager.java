@@ -177,7 +177,7 @@ public class Manager extends User {
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
 			case 1062:
-				System.out.println("That room number is already used, please use another one!");
+				System.out.println("That room number is already used!");
 				break;
 			default:
 				System.out.println("An error has occurred while creating the room!");

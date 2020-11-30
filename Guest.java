@@ -318,7 +318,7 @@ public class Guest extends User {
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
 			case 1062:
-				System.out.println("You already have this reservation!");
+				System.out.println("This reservation already exists!");
 				break;
 			case 1452:
 				System.out.println("That room does not exist!");
@@ -405,7 +405,7 @@ public class Guest extends User {
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
 			case 1062:
-				System.out.println("You already have this reservation!");
+				System.out.println("This reservation already exists!");
 				break;
 			case 1452:
 				System.out.println("That room does not exist!");
@@ -422,14 +422,12 @@ public class Guest extends User {
 	private void viewReservationRequests() {
 		System.out.println("Hotel RNTN Guest - View Reservation Requests");
 
-		String sql = "SELECT room_id, reserve_date, request FROM reservation_request WHERE account_id = ?";
+		String sql = "SELECT room_id, reserve_date, request FROM reservation_request NATURAL JOIN reservation WHERE account_id = ?";
 
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, id);
-			pstmt.executeQuery();
-
-			ResultSet rs = pstmt.getResultSet();
+			ResultSet rs = pstmt.executeQuery();
 
 			if (!rs.isBeforeFirst()) {
 				System.out.println("You have no reservation requests!");
@@ -459,25 +457,41 @@ public class Guest extends User {
 
 		String request = promptInput("reservation request", String.class);
 
-		String sql = "INSERT INTO reservation_request (account_id, room_id, reserve_date, request) VALUES (?, ?, ?, ?)";
+		String sql1 = "SELECT * FROM reservation WHERE account_id = ? AND room_id = ? AND reserve_date = ?";
 
+		// Only create reservation request if requested by same guest as reservation
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			PreparedStatement pstmt = conn.prepareStatement(sql1);
 			pstmt.setInt(1, id);
 			pstmt.setInt(2, roomId);
 			pstmt.setDate(3, reserveDate);
-			pstmt.setString(4, request);
-			pstmt.executeUpdate();
+			ResultSet rs = pstmt.executeQuery();
 
-			System.out.println("You have successfully created the reservation request!");
+			if (!rs.isBeforeFirst()) {
+				System.out.println("That reservation does not exist!");
+			} else {
+				String sql2 = "INSERT INTO reservation_request (room_id, reserve_date, request) VALUES (?, ?, ?)";
+
+				try {
+					pstmt = conn.prepareStatement(sql2);
+					pstmt.setInt(1, roomId);
+					pstmt.setDate(2, reserveDate);
+					pstmt.setString(3, request);
+					pstmt.executeUpdate();
+
+					System.out.println("You have successfully created the reservation request!");
+				} catch (SQLException e) {
+					switch (e.getErrorCode()) {
+					case 1062:
+						System.out.println("This reservation request already exists!");
+						break;
+					default:
+						System.out.println("An error has occurred while creating the reservation request!");
+					}
+				}
+			}
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
-			case 1062:
-				System.out.println("You already have this reservation request!");
-				break;
-			case 1452:
-				System.out.println("That reservation does not exist!");
-				break;
 			default:
 				System.out.println("An error has occurred while creating the reservation request!");
 			}
@@ -499,20 +513,39 @@ public class Guest extends User {
 
 		String request = promptInput("reservation request", String.class);
 
-		String sql = "DELETE FROM reservation_request WHERE account_id = ? AND room_id = ? AND reserve_date = ? AND request = ?";
+		String sql1 = "SELECT * FROM reservation WHERE account_id = ? AND room_id = ? AND reserve_date = ?";
 
+		// Only delete reservation request if requested by same guest as reservation
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
+			PreparedStatement pstmt = conn.prepareStatement(sql1);
 			pstmt.setInt(1, id);
 			pstmt.setInt(2, roomId);
 			pstmt.setDate(3, reserveDate);
-			pstmt.setString(4, request);
-			int deleted = pstmt.executeUpdate();
+			ResultSet rs = pstmt.executeQuery();
 
-			if (deleted > 0) {
-				System.out.println("You have successfully canceled the reservation request!");
+			if (!rs.isBeforeFirst()) {
+				System.out.println("That reservation does not exist!");
 			} else {
-				System.out.println("That reservation request does not exist!");
+				String sql2 = "DELETE FROM reservation_request WHERE room_id = ? AND reserve_date = ? AND request = ?";
+
+				try {
+					pstmt = conn.prepareStatement(sql2);
+					pstmt.setInt(1, roomId);
+					pstmt.setDate(2, reserveDate);
+					pstmt.setString(3, request);
+					int deleted = pstmt.executeUpdate();
+
+					if (deleted > 0) {
+						System.out.println("You have successfully canceled the reservation request!");
+					} else {
+						System.out.println("That reservation request does not exist!");
+					}
+				} catch (SQLException e) {
+					switch (e.getErrorCode()) {
+					default:
+						System.out.println("An error has occurred while canceling the reservation request!");
+					}
+				}
 			}
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
@@ -521,5 +554,4 @@ public class Guest extends User {
 			}
 		}
 	}
-
 }
