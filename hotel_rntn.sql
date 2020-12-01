@@ -133,13 +133,31 @@ DELIMITER ;
 INSERT INTO account (email, password, first_name, last_name, is_admin)
 VALUES ('admin@gmail.com', 'pass', 'Suneuy', 'Kim', TRUE),
        ('john@gmail.com', 'pass', 'John', 'Doe', FALSE),
-       ('jane@gmail.com', 'pass', 'Jane', 'Doe', FALSE);
+       ('jane@gmail.com', 'pass', 'Jane', 'Doe', FALSE),
+       ('joe@gmail.com', 'pass', 'Joe', 'Doe', FALSE);
 
 INSERT INTO room (room_num, room_floor, sqft, price)
 VALUES ('1a', 1, 300, 49.99),
-       ('1b', 1, 325, 59.99),
-       ('2a', 2, 400, 69.99);
+       ('1b', 1, 300, 49.99),
+       ('1c', 1, 300, 49.99),
+       ('2a', 2, 400, 59.99),
+       ('2b', 2, 400, 59.99),
+       ('2c', 2, 400, 59.99),
+       ('3a', 3, 500, 69.99),
+       ('3b', 3, 500, 69.99),
+       ('3c', 3, 500, 69.99),
+       ('4a', 4, 1000, 99.99);
 
 INSERT INTO reservation (account_id, room_id, reserve_date)
 VALUES (2, 1, DATE('2021-01-01')),
-       (3, 2, DATE('2021-10-30'));
+       (2, 4, DATE('2021-02-15')),
+       (3, 10, DATE('2021-10-30')),
+       (4, 10, DATE('2021-01-01')),
+       (4, 10, DATE('2021-01-02')),
+       (4, 10, DATE('2021-01-03')),
+       (4, 10, DATE('2021-01-04'));
+
+INSERT INTO canceled_reservation (account_id, room_id, reserve_date, cancel_date)
+VALUES (2, 5, DATE('2021-06-10'), DATE('2020-11-30')),
+       (2, 5, DATE('2021-06-11'), DATE('2020-11-30')),
+       (2, 5, DATE('2021-06-12'), DATE('2020-11-30'));
