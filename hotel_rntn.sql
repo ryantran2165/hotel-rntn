@@ -157,6 +157,9 @@ VALUES (2, 1, DATE('2021-01-01')),
        (4, 10, DATE('2021-01-03')),
        (4, 10, DATE('2021-01-04'));
 
+INSERT INTO reservation_request (room_id, reserve_date, request)
+VALUES (1, DATE('2021-01-01'), 'Please give extra towels');
+
 INSERT INTO canceled_reservation (account_id, room_id, reserve_date, cancel_date)
 VALUES (2, 5, DATE('2021-06-10'), DATE('2020-11-30')),
        (2, 5, DATE('2021-06-11'), DATE('2020-11-30')),
