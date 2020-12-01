@@ -464,7 +464,7 @@ public class Manager extends User {
 	private void viewCanceledReservations() {
 		System.out.println("Hotel RNTN Manager - View Canceled Reservations");
 
-		String sql = "SELECT account_id, first_name, last_name, room_id, room_num, reserve_date, cancel_date  FROM canceled_reservation INNER JOIN account ON account_id = account.id INNER JOIN room ON room_id = room.id";
+		String sql = "SELECT account_id, first_name, last_name, room_id, room_num, reserve_date, cancel_date FROM canceled_reservation INNER JOIN account ON account_id = account.id INNER JOIN room ON room_id = room.id WHERE (room_id, reserve_date) NOT IN (SELECT room_id, reserve_date FROM reservation_archive)";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
@@ -600,6 +600,9 @@ public class Manager extends User {
 			System.out.printf("Reservations archived: %d%n", updated);
 		} catch (SQLException e) {
 			switch (e.getErrorCode()) {
+			case 1062:
+				System.out.println("The archive contains a conflicting reservation (unique room_id and reserve_date)!");
+				break;
 			default:
 				System.out.println("An error has occurred while archiving reservations!");
 			}
