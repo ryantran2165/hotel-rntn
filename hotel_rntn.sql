@@ -131,7 +131,7 @@ BEFORE UPDATE ON reservation
 DELIMITER ;
 
 INSERT INTO account (email, password, first_name, last_name, is_admin)
-VALUES ('admin@gmail.com', 'pass', 'John', 'Doe', TRUE),
+VALUES ('admin@gmail.com', 'pass', 'Suneuy', 'Kim', TRUE),
        ('john@gmail.com', 'pass', 'John', 'Doe', FALSE),
        ('jane@gmail.com', 'pass', 'Jane', 'Doe', FALSE);
 
@@ -139,3 +139,7 @@ INSERT INTO room (room_num, room_floor, sqft, price)
 VALUES ('1a', 1, 300, 49.99),
        ('1b', 1, 325, 59.99),
        ('2a', 2, 400, 69.99);
+
+INSERT INTO reservation (account_id, room_id, reserve_date)
+VALUES (2, 1, DATE('2021-01-01')),
+       (3, 2, DATE('2021-10-30'));

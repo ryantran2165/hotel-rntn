@@ -10,7 +10,7 @@ public class HotelRNTN {
 
 	private static final int NEW_LINE_INTERVAL = 3;
 	private static final int PADDING = 5;
-	private static final int DIVIDER_LENGTH = 100;
+	private static final int DIVIDER_LENGTH = 150;
 	private static final String DIVIDER_STRING = new String(new char[DIVIDER_LENGTH]).replace("\0", "-");
 
 	public static void main(String[] args) {
@@ -18,7 +18,8 @@ public class HotelRNTN {
 		Scanner scanner = new Scanner(System.in);
 
 		try {
-			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + DATABASE_NAME + "?serverTimezone=UTC",
+			conn = DriverManager.getConnection(
+					"jdbc:mysql://localhost:3306/" + DATABASE_NAME + "?serverTimezone=America/Los_Angeles",
 					DATABASE_USERNAME, DATABASE_PASSWORD);
 			start(conn, scanner);
 		} catch (SQLException e) {

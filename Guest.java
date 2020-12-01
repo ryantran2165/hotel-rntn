@@ -95,6 +95,7 @@ public class Guest extends User {
 				firstName = rs.getString("first_name");
 				lastName = rs.getString("last_name");
 
+				System.out.println("You have successfully signed in!");
 				startSignedIn();
 			} else {
 				System.out.println("Invalid credentials!");
@@ -119,13 +120,13 @@ public class Guest extends User {
 
 		while (!choice.equals("12")) {
 			HotelRNTN.printDivider();
-			System.out.printf("Signed in as guest %s %s%n", firstName, lastName);
+			System.out.printf("Hotel RNTN Guest - %s %s%n", firstName, lastName);
 			HotelRNTN.printOptions(options);
 			choice = scanner.nextLine();
 
 			switch (choice) {
 			case "1":
-				viewRoomsAll();
+				viewAllRooms();
 				break;
 			case "2":
 				viewRoomsPrice();
@@ -286,7 +287,7 @@ public class Guest extends User {
 	private void viewReservations() {
 		System.out.println("Hotel RNTN Guest - View Reservations");
 
-		String sql = "SELECT room_id, reserve_date FROM reservation WHERE account_id = ?";
+		String sql = "SELECT room_id, room_num, room_floor, sqft, price, reserve_date FROM reservation INNER JOIN room ON room_id = room.id WHERE account_id = ?";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
@@ -601,6 +602,25 @@ public class Guest extends User {
 		} finally {
 			HotelRNTN.closeQuietly(rs);
 			HotelRNTN.closeQuietly(pstmt1);
+		}
+	}
+
+	private void printReservations(ResultSet rs) throws SQLException {
+		System.out.printf("%-20s%-20s%-20s%-20s%-20s%-20s%n", "room id", "room number", "room floor", "sqft", "price",
+				"reserve date");
+
+		while (rs.next()) {
+			int roomId = rs.getInt("room_id");
+			String roomNum = rs.getString("room_num");
+			int roomFloor = rs.getInt("room_floor");
+			int sqft = rs.getInt("sqft");
+			BigDecimal price = rs.getBigDecimal("price");
+			Date reserveDate = rs.getDate("reserve_date");
+
+			String reserveDateStr = dateFormat.format(reserveDate);
+
+			System.out.printf("%-20d%-20s%-20d%-20d%-20.2f%-20s%n", roomId, roomNum, roomFloor, sqft, price,
+					reserveDateStr);
 		}
 	}
 }

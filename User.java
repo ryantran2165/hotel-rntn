@@ -44,7 +44,7 @@ public abstract class User {
 		}
 	}
 
-	protected void viewRoomsAll() {
+	protected void viewAllRooms() {
 		System.out.println("Hotel RNTN - View All Rooms");
 
 		String sql = "SELECT id, room_num, room_floor, sqft, price FROM room";
@@ -85,18 +85,6 @@ public abstract class User {
 		}
 	}
 
-	protected void printReservations(ResultSet rs) throws SQLException {
-		System.out.printf("%-20s%-20s%n", "room id", "reserve date");
-
-		while (rs.next()) {
-			int roomId = rs.getInt("room_id");
-			Date reserveDate = rs.getDate("reserve_date");
-			String date = dateFormat.format(reserveDate);
-
-			System.out.printf("%-20d%-20s%n", roomId, date);
-		}
-	}
-
 	protected void printReservationRequests(ResultSet rs) throws SQLException {
 		System.out.printf("%-20s%-20s%-20s%n", "room id", "reserve date", "request");
 
@@ -104,6 +92,7 @@ public abstract class User {
 			int roomId = rs.getInt("room_id");
 			Date reserveDate = rs.getDate("reserve_date");
 			String request = rs.getString("request");
+			
 			String date = dateFormat.format(reserveDate);
 
 			System.out.printf("%-20d%-20s%-20s%n", roomId, date, request);
